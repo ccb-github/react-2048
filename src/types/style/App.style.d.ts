@@ -1,0 +1,1 @@
+export declare module './style/App.style'

@@ -1,7 +1,5 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { View, useWindowDimensions, Text } from "react-native";
-import { Button } from "react-native-paper";
-import { AppOwnership,  } from "expo-constants"
 import FootBox from "../component/FootBox";
 import HeaderBox from "../component/HeaderBox";
 import Tile from "../component/Tile";
@@ -10,8 +8,6 @@ import styles from '../style/GameScreen.style'
 import createResponder from "../utils/panRes";
 import { saveData } from '../utils/storage'
 import { gameBoardSize } from "../model/GameBox";
-import ConfirmDialog from "../component/ConfirmDialog";
-import GameBox from "../component/GameBox";
 import { GameScreenProps } from "../navigation";
 
 
@@ -298,7 +294,7 @@ export default function GameScreen(props:
           ))
         )}
       </View>
-      <FootBox
+      {/* <FootBox
         moveTime={moveTime}
         gameTime={gameTime.current}
         style={{
@@ -307,7 +303,7 @@ export default function GameScreen(props:
           flexShrink: 1,
           flexBasis: "auto",
         }}
-      />
+      /> */}
     </View>
   );
 }

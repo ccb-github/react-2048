@@ -11,25 +11,6 @@ import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanima
 const {width: vw, height:vh, scale} = Dimensions
 
 
-
-
-
-
-/* const Square = React.forwardRef( (props, ref) => { 
-  let [valueState ,setValueState] = useState(props.value)
-  
-  return (
-    <Animatable.View
-      newFunction = {()=>{}}
-      ref={ref}
-      style={[tileStyle.squareFrame, tileStyle.innerTileStyle(valueState)]}
-      animation="zoomIn">
-        
-      <Text>{valueState>0? valueState : ''}</Text>
-    </Animatable.View>
-  );
-}) */
-
 const MARGIN_WIDTH = 0
 function Tile(props: TileProps){
   
@@ -49,7 +30,7 @@ function Tile(props: TileProps){
   }))
 
  
-  const viewRef = useRef<AnimatedView>();
+
     //ITEM_WIDTH = (vw - MARGIN_WIDTH * 8) >> 2;
   const tileSetting = {};
   const tilePositionStyle = {
@@ -87,9 +68,6 @@ function Tile(props: TileProps){
     if (props.value > 0) {
       return (
         <Animated.View
-          ref={viewRef}
-          iterationCount={1}
-          useNativeDriver={true}
           style={[
             styles.squareFrame,
             props.style,

@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { View, Text, ViewStyle, StyleSheet} from 'react-native'
 import Dimensions from '../utils/dimension'
-
-import * as Animatable from 'react-native-animatable'
 import { divStyles } from '../style/common.style';
 import Animated, { useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
 
@@ -14,21 +12,44 @@ const FootBox = (props: {
   style?: ViewStyle;
 }) => {
   let [gameTime, setGameTime] = useState(props.gameTime);
-  const { moveTime } = props
+  const { moveTime: moveTimeProp } = props
+
+  const [moveTime, setMoveTime] = useState(moveTimeProp)
+  const [moveTimeSign, setMoveTimeSign ] = useState("")
+  /* useMemo<"+" | "-">(
+    () => (moveTimeSign > moveTime ? "+" : "-"),
+    [moveTimeProp]
+  ); */
   const  opacity = useSharedValue(0)
   let isMoveTimeUpdate: boolean | null = null
   const { style } = props;
+
   const getTimeInfo = ( duration: number ) => {
     var seconds = Math.floor(duration % 60), hours = Math.floor(duration / 3600), 
         minutes = Math.floor((duration - 3600 * hours)/60);
     return `${minutes > 9 ? minutes : `0${minutes}`}:${seconds > 9 ? seconds : `0${seconds}`}`
   }
   useEffect(() => {
-    isMoveTimeUpdate = true
-    console.log("Effect run")
+    const removeGameTimeCycle = setInterval(() => {
+      setGameTime((preGameTime) => preGameTime + 1)} , 1000)
+    return () => {
+      clearInterval(removeGameTimeCycle)
+    }
+  }, [])
+  useEffect(() => {
+    
+    if(moveTimeProp > moveTime) {
+      setMoveTimeSign("+")
+      setMoveTime(moveTimeProp)
+    }
+    else if(moveTimeProp < moveTime) {
+      setMoveTimeSign("-")
+      setMoveTime(moveTimeProp)
+    }
+    
     opacity.value = withSequence( withTiming(1), withTiming(0))
     //opacity.value = 0
-  }, [moveTime])
+  }, [moveTimeProp])
   const plusMoveAnimationStyle = useAnimatedStyle( () => ({
     opacity: opacity.value
   }))
@@ -64,18 +85,18 @@ const FootBox = (props: {
           <Text style={{ fontSize: getFontSize(35), ...styles.valueText }}>
             {moveTime}
             <Animated.Text style={[styles.addMoveText, plusMoveAnimationStyle]}>
-              +1
+              {moveTimeSign}1
             </Animated.Text>
           </Text>
           
         </View>
-        <View style={styles.addMoveView}>
-          {/* isMoveTimeUpdate ? : null */} 
+        {/* <View style={styles.addMoveView}>
+          
           <Animated.Text style={[styles.addMoveText, plusMoveAnimationStyle]}>
-            +1
+            {moveTimeSign}1
           </Animated.Text>
         
-        </View>
+        </View> */}
       </View>
     </Animated.View>
   );

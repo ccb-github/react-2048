@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
+const GAME_STORAGE_PREFIX = "REACT-2048"
 
 const saveData = async (key: string, value: string | {[key: string]: string}) => {
   typeof value === 'object' ? value = JSON.stringify(value): '' 
@@ -13,7 +13,7 @@ const loadData = async (key: string) => {
     console.log(result)
   })
 }
-globalThis.loadData = loadData
+
 export { 
   saveData,
   loadData

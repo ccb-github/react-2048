@@ -6,6 +6,8 @@ import GameScreen from "../screen/GameScreen";
 import { divStyles } from "../style/common.style";
 import Dimension from "../utils/dimension";
 import ConfirmDialog from "./ConfirmDialog";
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import { BaseButton } from "react-native-gesture-handler";
 
 const { scale, getFontSize, getWidth } = Dimension;
 
@@ -33,6 +35,24 @@ const HeaderBox = (props: HeaderBoxProps) => {
   const [dialogState, setDialogState] = useState<
     null | "undo" | "restartGame" | "saveGame"
   >(null);
+  const width = useSharedValue(100);
+ 
+  const randomWidth = useSharedValue(300);
+  useEffect( () => {
+    console.log(randomWidth.value)
+  }, [randomWidth.value])
+  const config = {
+    duration: 500,
+    easing: Easing.bezier(0.5, 0.01, 0, 1),
+  };
+  const handlePress = () => {
+    randomWidth.value = Math.random() * 350;
+  };
+  const style = useAnimatedStyle(() => {
+    return {
+      width: withTiming(randomWidth.value, config),
+    };
+  });
 
   /* TODO old code  
   useEffect(() => {
@@ -67,17 +87,19 @@ const HeaderBox = (props: HeaderBoxProps) => {
     }
   };
   return (
-    <View
+    <Animated.View
       style={[
         divStyles.rowDiv,
-        { width: "100%", flexShrink: 1 },
+        {
+          flexShrink: 1
+        },
+        style
       ]}
     >
       {dialogState ? (
         <ConfirmDialog
           content={dialogTitle[dialogState]}
-          dialogAction={dialogActionWrapper()}
-        />
+          dialogAction={dialogActionWrapper()} />
       ) : null}
       <View
         style={[
@@ -85,10 +107,8 @@ const HeaderBox = (props: HeaderBoxProps) => {
           divStyles.colDiv,
           {
             width: "100%",
-            height: "unset",
+            // height: "unset",
             justifyContent: "flex-end",
-            borderColor: "red",
-            borderWidth: 1,
           },
         ]}
       >
@@ -111,7 +131,10 @@ const HeaderBox = (props: HeaderBoxProps) => {
             style={{
               margin: getWidth(10),
             }}
-            onPress={() => setDialogState("saveGame")}
+            onPress={() => {
+              handlePress();
+              //setDialogState("saveGame")
+            } }
             mode="contained"
           >
             Save Game
@@ -128,7 +151,7 @@ const HeaderBox = (props: HeaderBoxProps) => {
             mode="contained"
             onPress={() => {
               setDialogState("undo");
-            }}
+            } }
           >
             Undo
           </Button>
@@ -145,7 +168,7 @@ const HeaderBox = (props: HeaderBoxProps) => {
           </Button>
         </View>
       </View>
-    </View>
+    </Animated.View>
   );
 };
 

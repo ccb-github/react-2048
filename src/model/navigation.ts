@@ -1,5 +1,5 @@
 export const StackRouteName = {
-  home: "home",
-  main: "main",
-  load: "loadGame"
+  home: "Home",
+  main: "Main",
+  load: "LoadGame"
 }

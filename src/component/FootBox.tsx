@@ -4,6 +4,7 @@ import Dimensions from '../utils/dimension'
 
 import * as Animatable from 'react-native-animatable'
 import { divStyles } from '../style/common.style';
+import Animated, { useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
 
 const {scale, getFontSize} = Dimensions
 
@@ -14,6 +15,7 @@ const FootBox = (props: {
 }) => {
   let [gameTime, setGameTime] = useState(props.gameTime);
   const { moveTime } = props
+  const  opacity = useSharedValue(0)
   let isMoveTimeUpdate: boolean | null = null
   const { style } = props;
   const getTimeInfo = ( duration: number ) => {
@@ -23,13 +25,19 @@ const FootBox = (props: {
   }
   useEffect(() => {
     isMoveTimeUpdate = true
+    console.log("Effect run")
+    opacity.value = withSequence( withTiming(1), withTiming(0))
+    //opacity.value = 0
   }, [moveTime])
+  const plusMoveAnimationStyle = useAnimatedStyle( () => ({
+    opacity: opacity.value
+  }))
   useEffect(() => {
     console.log("Foot box update effect")
   })
   console.log("Foot box body statement")
   return (
-    <View style={[divStyles.colDiv, style]}>
+    <Animated.View style={[divStyles.colDiv, style]}>
       {/* left box */}
       <View style={styles.leftBox}>
         <Text style={{ fontSize: getFontSize(25), fontWeight: "bold" }}>
@@ -55,17 +63,21 @@ const FootBox = (props: {
         <View style={styles.moveTimeView}>
           <Text style={{ fontSize: getFontSize(35), ...styles.valueText }}>
             {moveTime}
+            <Animated.Text style={[styles.addMoveText, plusMoveAnimationStyle]}>
+              +1
+            </Animated.Text>
           </Text>
+          
         </View>
         <View style={styles.addMoveView}>
-          {isMoveTimeUpdate ? 
-          <Animatable.Text animation={"zoomOut"} style={styles.addMoveText}>
+          {/* isMoveTimeUpdate ? : null */} 
+          <Animated.Text style={[styles.addMoveText, plusMoveAnimationStyle]}>
             +1
-          </Animatable.Text>
-         : null}
+          </Animated.Text>
+        
         </View>
       </View>
-    </View>
+    </Animated.View>
   );
 };
 
@@ -117,7 +129,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     position: "absolute",
     top: 35 * scale,
-    zIndex: 1,
+    zIndex: 10,
   },
 });
 

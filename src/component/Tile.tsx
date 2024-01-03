@@ -1,12 +1,13 @@
 import {
   ViewStyle, TextProps, TextStyle, Text, ViewProps, ViewProperties, View
 } from 'react-native';
-import React, { ClassicComponent, Component, createRef } from 'react'
+import React, { ClassicComponent, Component, createRef, useEffect, useRef } from 'react'
 import styles, { innerTileStyle} from '../style/Tile.style'
 import Animatable from '../animation/register'
 import Dimensions from '../utils/dimension'
 import type { AnimatableProperties, View as AnimatedView } from 'react-native-animatable';
 import { TileProps, TileState } from '../types/component/Tile';
+import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 const {width: vw, height:vh, scale} = Dimensions
 
 
@@ -30,87 +31,86 @@ const {width: vw, height:vh, scale} = Dimensions
 }) */
 
 const MARGIN_WIDTH = 0
-class Tile extends React.PureComponent<TileProps, TileState> {
-  ITEM_WIDTH: number;
-  tileSetting: {};
-  refObj = createRef();
-  tilePositionStyle: {
-    left: number;
-    top: number;
-    width: number;
-    height: number;
-  };
-  testMember = {
-    "Make sense": () => {
-      return "Did this get execute";
-    },
-  };
-  viewRef: React.RefObject<Animatable.View>
-
-  constructor(props: TileProps) {
-    super(props);
+function Tile(props: TileProps){
   
-    console.log(props);
-    this.viewRef = createRef<AnimatedView>();
-    this.ITEM_WIDTH = (vw - MARGIN_WIDTH * 8) >> 2;
-    this.tileSetting = {};
-    this.tilePositionStyle = {
+
+  
+  const motionValue = useSharedValue(0)
+  const motionStyle = useAnimatedStyle(() => ({
+    left:
+    props.position[0] * (props.tileWidth + MARGIN_WIDTH * 2) +
+    MARGIN_WIDTH * 2 + props.motionSign[1] * props.tileWidth,
+  top:
+    props.position[1] * (props.tileWidth + MARGIN_WIDTH * 2) +
+    MARGIN_WIDTH * 2 + props.motionSign[0] * props.tileWidth,
+  width: props.tileWidth,
+  height: props.tileWidth
+    
+  }))
+
+ 
+  const viewRef = useRef<AnimatedView>();
+    //ITEM_WIDTH = (vw - MARGIN_WIDTH * 8) >> 2;
+  const tileSetting = {};
+  const tilePositionStyle = {
       left:
-        props.position[0] * (this.ITEM_WIDTH + MARGIN_WIDTH * 2) +
+        props.position[0] * (props.tileWidth + MARGIN_WIDTH * 2) +
         MARGIN_WIDTH * 2,
       top:
-        props.position[1] * (this.ITEM_WIDTH + MARGIN_WIDTH * 2) +
+        props.position[1] * (props.tileWidth + MARGIN_WIDTH * 2) +
         MARGIN_WIDTH * 2,
-      width: this.ITEM_WIDTH,
-      height: this.ITEM_WIDTH,
+      width: props.tileWidth,
+      height: props.tileWidth
     };
-  }
+  
 
-  componentDidUpdate(_prevProps: TileProps, _prevState: TileState) {
-    console.log(`Tile.view ${this.props.position}`, this.viewRef);
-    switch(this.props.moveMent) {
-      case 'left':
-        break
-      case 'right':
+  useEffect(() =>  {
+
+    
+    
+    // switch(props.moveMent) {
+    //   case 'left':
+    //     break
+    //   case 'right':
         
-        break
-      case 'up':
-        break
-      case 'down':
-        break
-    }
-  }
+    //     break
+    //   case 'up':
+    //     break
+    //   case 'down':
+    //     break
+    // }
+  }, [props.value])
 
   
 
-  render() {
-    if (this.props.value > 0) {
+
+    if (props.value > 0) {
       return (
-        <Animatable.View
-          ref={this.viewRef}
-          animation={this.props.animation}
+        <Animated.View
+          ref={viewRef}
           iterationCount={1}
           useNativeDriver={true}
           style={[
             styles.squareFrame,
-            this.props.style,
-            this.tilePositionStyle,
+            props.style,
+            tilePositionStyle,
+            motionStyle,
             { borderColor: "blue" },
           ]}
         >
           <Text
             adjustsFontSizeToFit={true}
-            style={[styles.baseTileText, innerTileStyle(this.props.value)]}
+            style={[styles.baseTileText, innerTileStyle(props.value)]}
           >
-            {this.props.value}
+            {props.value}
           </Text>
-        </Animatable.View>
+        </Animated.View>
       );
     } else {
       return null;
     }
-  }
+  
 }
-
+// const AnimatedTile = Animated.createAnimatedComponent(Tile)
 export default Tile
 

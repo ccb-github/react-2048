@@ -1,20 +1,20 @@
 import React from 'react'
 import { Button } from 'react-native-paper'
 import { View, StyleSheet } from 'react-native'
+import { HomeScreenProps } from '../navigation'
 
 
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen = ({ navigation }: HomeScreenProps) => {
     return (
       <View>
-      
         <Button mode='outlined'
-          onPress={ () => {navigation.navigate('main')} }>
-          START NEW GAME 
+          onPress={ () => {navigation.navigate('Main')} }>
+          Start new game
         </Button>
         <Button mode='outlined'
           onLongPress={()=>{}}
-          onPress={ () => {navigation.navigate('loadGame')} }>
+          onPress={ () => {navigation.navigate("LoadGame")} }>
           LOAD SAVED
         </Button>
         

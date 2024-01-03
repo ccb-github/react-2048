@@ -3,7 +3,11 @@ import { View } from "react-native"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { Button } from "react-native-paper"
 import { StackRouteName } from "../model/navigation"
-export default function LoadGameScreen({navigation}) {
+import { NavigatorScreenParams, ParamListBase } from "@react-navigation/native"
+import { StackScreenProps } from "@react-navigation/stack"
+import { LoadGameScreenProps } from "../navigation"
+
+export default function LoadGameScreen({navigation}: LoadGameScreenProps) {
 	const [gameRecordList, setGameRecordList] = useState<string []>([])
   
 	useEffect(() => {

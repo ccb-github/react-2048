@@ -5,6 +5,7 @@ export type TileData = {
 }
 export type TileProps = {
   value: number;
+  tileWidth: number
   style?: ViewStyle;
   position: number[];
   animation?:
@@ -15,6 +16,7 @@ export type TileProps = {
       };
     }
     | string;
+  motionSign: [-1, 0] | [1, 0] | [0, -1] | [0, 1] | [0, 0]
   moveMent: "static" | "left" | "right" | "up" | "down"
 };
 export type TileState = {

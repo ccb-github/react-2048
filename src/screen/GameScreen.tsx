@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { View, useWindowDimensions } from "react-native";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { View, useWindowDimensions, Text } from "react-native";
 import { Button } from "react-native-paper";
 import { AppOwnership,  } from "expo-constants"
 import FootBox from "../component/FootBox";
@@ -12,6 +12,7 @@ import { saveData } from '../utils/storage'
 import { gameBoardSize } from "../model/GameBox";
 import ConfirmDialog from "../component/ConfirmDialog";
 import GameBox from "../component/GameBox";
+import { GameScreenProps } from "../navigation";
 
 
 
@@ -23,11 +24,12 @@ type GameStatus = {
  */
 type MoveDirection = "static" | "left" | "up" | "down" | "right"
 
+type MotionSign = [0, 0] | [-1, 0] | [1, 0] | [0, -1] |[0, 1] 
 
 //TODO migrate to reducer pattern  
 
 export default function GameScreen(props:
-  { route: { params?: {loadedGameData: number[][]} } }
+  GameScreenProps
 ){
   let counter = -1
   let context = useContext(GameBoard)
@@ -49,7 +51,9 @@ export default function GameScreen(props:
   const {loadedGameData} = props.route.params || {};
   const [moveTime, setMoveTime] = useState(0) 
   const [moveDir, setMoveDir] = useState<MoveDirection>("static")
-
+  const [motionSign, setMotionSign] = useState<MotionSign>([0, 0])
+  const MARGIN_WIDTH = 0
+  // let TILE_WIDTH, GAMEBOX_WIDTH
   const useMoveTile = (dirSign: number[], prevTileMatrix: number[][]) => {
     const size = gameBoardSize;
     let squareStack: number[][] = [[],[],[],[]] 
@@ -123,7 +127,8 @@ export default function GameScreen(props:
 
     return squareStack;
   };
- 
+  const GAMEBOX_WIDTH = width - 10 * scale
+  const TILE_WIDTH = (GAMEBOX_WIDTH - 8 * MARGIN_WIDTH) >> 2 
   useEffect(() => {
     /**Load the transferred data to screen component */
     if(Array.isArray(loadedGameData)) {
@@ -206,7 +211,7 @@ export default function GameScreen(props:
   const undo = () => {
     if(history.current.length !== 0){
       squareMatrix.current = JSON.parse(history.current.pop()!) as number[][]; 
-      setMoveTime(moveTime + 1)     
+      setMoveTime(moveTime - 1)     
     }
   }
   
@@ -251,15 +256,16 @@ export default function GameScreen(props:
     
   return (
     <View style={styles.gameBoard}>
-      {/* <HeaderBox
+      <Text>58</Text>
+      <HeaderBox
         restartGame={restartGame}
         undo={undo}
         saveGame={saveGame}
-  />*/}
+      />
       <View
         style={{
-          width: width,
-          height: width,
+          width: GAMEBOX_WIDTH,
+          height: GAMEBOX_WIDTH,
           borderColor: "#000",
           borderWidth: 2,
         }}
@@ -269,9 +275,14 @@ export default function GameScreen(props:
           row.map((col, j) => (
             <Tile
               key={i * 4 + j}
-              style={styles.tileContainer}
+              tileWidth={TILE_WIDTH}
+              style={{
+                ...styles.tileContainer,
+                width: TILE_WIDTH
+              }}
               value={col}
               moveMent={moveDir}
+              motionSign={motionSign}
               animation={{
                 0: {
                   opacity: 0.6,
@@ -287,7 +298,6 @@ export default function GameScreen(props:
           ))
         )}
       </View>
-      {/*
       <FootBox
         moveTime={moveTime}
         gameTime={gameTime.current}
@@ -297,7 +307,7 @@ export default function GameScreen(props:
           flexShrink: 1,
           flexBasis: "auto",
         }}
-      /> */}
+      />
     </View>
   );
 }

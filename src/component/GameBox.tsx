@@ -50,7 +50,7 @@ const GameBox = (props: {tiles?: TileData[], addMoveTime: () => void}) => {
     [2, 4, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0],[0, 0, 0, 0]
   ])
   const [refreshTime, setRefreshTime] = useState(0)
-  let moveHisotry = useRef<string[]>([])
+  let moveHistory = useRef<string[]>([])
   let tileArray = props.tiles || ((gameBoardSize: number) => {
     let counter = -1;
     return Array(gameBoardSize * gameBoardSize).fill(0)
@@ -80,14 +80,6 @@ const GameBox = (props: {tiles?: TileData[], addMoveTime: () => void}) => {
       }
     }
     return false;
-  }
-
-  
-
-  const moveAvailable = () => {
-    if (haveEmptySpace()) 
-      return true;
-    return bfsGrid(squareMatrix.current);
   }
 
   const addRandomTile = () => {
@@ -198,7 +190,7 @@ const GameBox = (props: {tiles?: TileData[], addMoveTime: () => void}) => {
       }
     }
     
-    moveHisotry.current.push(JSON.stringify(squareMatrix.current))
+    moveHistory.current.push(JSON.stringify(squareMatrix.current))
     setRefreshTime( prevFreshTime => prevFreshTime + 1)
     if (haveEmptySpace()) {
       addRandomTile();

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { View, useWindowDimensions, Text } from "react-native";
+import { View, useWindowDimensions, Text, Alert } from "react-native";
 import FootBox from "../component/FootBox";
 import HeaderBox from "../component/HeaderBox";
 import Tile from "../component/Tile";
@@ -137,7 +137,6 @@ export default function GameScreen(props:
     else {
       throw Error(`Invalid loadedGameData ${JSON.stringify(loadedGameData)}`)
     } 
-   
   }, [])
     
   const bfsGrid = (target: number[][]) => {
@@ -154,7 +153,7 @@ export default function GameScreen(props:
     return false 
   } 
 
-  const addRandomTile = () => {
+  function addRandomTile(){
     const value = Math.random() < 0.9 ? 2 : 4;
     let ri = Math.floor(Math.random() * 4),
       ci = Math.floor(Math.random() * 4);
@@ -165,20 +164,13 @@ export default function GameScreen(props:
 
     squareMatrix.current[ri][ci] = value
   }
-  const restartGame = () => {
-    
-    // for (let row of squareMatrix.current) {
-    //   for (let col of row) 
-    //     col = -1;
-    // }
+  function restartGame() {
     for (let i = 0; i < gameBoardSize; i++) {
       for (let j = 0; i < gameBoardSize; j++) {
         squareMatrix.current[i][j] = -1
       }
     }
-   
     point.current = 0;
-    console.log('restart func called')
     
     // TODO dealing with not moving at all
     setMoveTime(0)
@@ -213,7 +205,6 @@ export default function GameScreen(props:
   
 
   const moveFrame = (dirSign: number[]) => {
-    const theGameBoxSize = gameBoardSize;
     let squareStack = useMoveTile(dirSign, squareMatrix.current)
    
     //Rotate the matrix back
@@ -245,14 +236,15 @@ export default function GameScreen(props:
     if (haveEmptySpace()) {
       addRandomTile();
     }
+    else if(!bfsGrid(squareMatrix.current)) {
+      // The game is over 
+      Alert.alert("Game over")
+    }
     setMoveTime(moveTime + 1)
   }
-  
-  console.log("Rerendering")
     
   return (
     <View style={styles.gameBoard}>
-      <Text>58</Text>
       <HeaderBox
         restartGame={restartGame}
         undo={undo}
@@ -294,7 +286,7 @@ export default function GameScreen(props:
           ))
         )}
       </View>
-      {/* <FootBox
+      <FootBox
         moveTime={moveTime}
         gameTime={gameTime.current}
         style={{
@@ -303,7 +295,7 @@ export default function GameScreen(props:
           flexShrink: 1,
           flexBasis: "auto",
         }}
-      /> */}
+      />
     </View>
   );
 }

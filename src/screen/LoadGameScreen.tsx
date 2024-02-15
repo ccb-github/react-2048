@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react"
-import { View } from "react-native"
+import { View, Text, useWindowDimensions } from "react-native"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { Button } from "react-native-paper"
 import { StackRouteName } from "../model/navigation"
-import { NavigatorScreenParams, ParamListBase } from "@react-navigation/native"
-import { StackScreenProps } from "@react-navigation/stack"
 import { LoadGameScreenProps } from "../navigation"
 
 export default function LoadGameScreen({navigation}: LoadGameScreenProps) {
-	const [gameRecordList, setGameRecordList] = useState<string []>([])
+	const [gameRecordList, setGameRecordList] = useState<readonly string []>([])
+  const { scale } = useWindowDimensions()
   
 	useEffect(() => {
 	  AsyncStorage.getAllKeys()
@@ -29,13 +28,41 @@ export default function LoadGameScreen({navigation}: LoadGameScreenProps) {
         console.error(error);
       });
   }
+  const EmptyRecordList = () => (
+    <Text
+      style={{
+        fontWeight: "700",
+        fontSize: 10 * scale,
+        textAlign: "center",
+        textAlignVertical: "center",
+        backgroundColor:"blue",
+        height: 200,
+      }}
+    >
+      No record found in storage
+    </Text>
+  ); 
 	return (
-    <View>
-      {gameRecordList.map((gameRecord, index) => (
-        <Button mode="outlined" key={index} onPress={() => {loadGame(gameRecord)}}>
-          {gameRecord}
-        </Button>
-      ))}
+    <View style={{
+      flexDirection: "column",
+      backgroundColor: "red",
+      height: "100%"
+    }}>
+      {gameRecordList.length !== 0 ? (
+        gameRecordList.map((gameRecord, index) => (
+          <Button
+            mode="outlined"
+            key={index}
+            onPress={() => {
+              loadGame(gameRecord);
+            }}
+          >
+            {gameRecord}
+          </Button>
+        ))
+      ) : (
+        <EmptyRecordList />
+      )}
     </View>
   );
 }

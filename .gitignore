@@ -75,3 +75,6 @@ dist/
 
 # History plugin
 .history/*
+docker-bigsur.sh
+docker-mot.sh
+package-lock.json

@@ -5,7 +5,9 @@ export const MainStackRouteName = ["Main", "LoadGame", "Home"] as const
 export type MainStackParamList = {
   Home: undefined
   LoadGame?: undefined
-  Main?: number[][] 
+  Main?:{ 
+    loadedGameData: number[][]
+  } 
 } & ParamListBase & Record<typeof MainStackRouteName[number], unknown>
 export type LoadGameScreenProps =
   StackScreenProps<MainStackParamList, "LoadGame">

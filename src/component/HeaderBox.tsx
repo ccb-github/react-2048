@@ -35,7 +35,6 @@ const HeaderBox = (props: HeaderBoxProps) => {
   const [dialogState, setDialogState] = useState<
     null | "undo" | "restartGame" | "saveGame"
   >(null);
-  const width = useSharedValue(100);
  
   const randomWidth = useSharedValue(300);
   useEffect( () => {
@@ -54,17 +53,6 @@ const HeaderBox = (props: HeaderBoxProps) => {
     };
   });
 
-  /* TODO old code  
-  useEffect(() => {
-    console.log("context", gameBoard);
-    fetch("https://reactnative.dev/movies.json")
-      .then((response) => response.json())
-      .then((json) => console.log(json.movies))
-      .catch((error) => console.error(error))
-      .finally(() => {
-        console.log("fetch finished");
-      });
-  }, []); */
   const dialogActionWrapper = () => {
     switch (dialogState) {
       case "restartGame":

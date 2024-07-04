@@ -78,3 +78,7 @@ dist/
 docker-bigsur.sh
 docker-mot.sh
 package-lock.json
+
+
+### User config
+package-lock.json

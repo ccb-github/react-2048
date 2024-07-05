@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { View, Text, ViewStyle, StyleSheet} from 'react-native'
+import { View, Text, ViewStyle, StyleSheet, TextStyle} from 'react-native'
 import Dimensions from '../utils/dimension'
 import { divStyles } from '../style/common.style';
-import Animated, { useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
 
 const {scale, getFontSize} = Dimensions
 
@@ -20,7 +20,7 @@ const FootBox = (props: {
     () => (moveTimeSign > moveTime ? "+" : "-"),
     [moveTimeProp]
   ); */
-  const  opacity = useSharedValue(0)
+  const opacityAnimatationValue = useSharedValue(0)
   let isMoveTimeUpdate: boolean | null = null
   const { style } = props;
 
@@ -47,21 +47,28 @@ const FootBox = (props: {
       setMoveTime(moveTimeProp)
     }
     
-    opacity.value = withSequence( withTiming(1), withTiming(0))
+    console.log({opacityAnimatationValue: opacityAnimatationValue.value})
+    opacityAnimatationValue.value += 10 
+    
+    
+    //{0: 1, 1: 0}[opacityAnimatationValue.value]
+    
+    
+    //withSequence( withTiming(1), withTiming(0))
     //opacity.value = 0
   }, [moveTimeProp])
+
   const plusMoveAnimationStyle = useAnimatedStyle( () => ({
-    opacity: opacity.value
+    transform: [{ translateX: withSpring(opacityAnimatationValue.value) }]
+    //left: withSpring(opacityAnimatationValue.value)
   }))
-  useEffect(() => {
-    console.log("Foot box update effect")
-  })
-  console.log("Foot box body statement")
+
+  
   return (
     <Animated.View style={[divStyles.colDiv, style]}>
       {/* left box */}
       <View style={styles.leftBox}>
-        <Text style={{ fontSize: getFontSize(25), fontWeight: "bold" }}>
+        <Text style={{ fontSize: getFontSize(25), fontWeight: "bold", textAlign: "center" }}>
           Game Time
         </Text>
         <View style={{ justifyContent: "center", width: "100%" }}>
@@ -81,22 +88,21 @@ const FootBox = (props: {
           Move 
         </Text>
 
-        <View style={styles.moveTimeView}>
+        <Animated.View style={[styles.moveTimeView, plusMoveAnimationStyle]}>
           <Text style={{ fontSize: getFontSize(35), ...styles.valueText }}>
             {moveTime}
+            <Animated.Text style={[styles.addMoveText, ]}>
+              {moveTimeSign}1
+            </Animated.Text>
+          </Text>  
+          {/* <View style={styles.addMoveView}>
+            
             <Animated.Text style={[styles.addMoveText, plusMoveAnimationStyle]}>
               {moveTimeSign}1
             </Animated.Text>
-          </Text>
           
-        </View>
-        {/* <View style={styles.addMoveView}>
-          
-          <Animated.Text style={[styles.addMoveText, plusMoveAnimationStyle]}>
-            {moveTimeSign}1
-          </Animated.Text>
-        
-        </View> */}
+          </View> */}
+        </Animated.View>
       </View>
     </Animated.View>
   );
@@ -125,6 +131,8 @@ const styles = StyleSheet.create({
   },
   rightBox:{
     flex: 1,
+    alignItems: "center",
+    justifyContent: "flex-start"
   },
 
   gameTimeText: {
@@ -138,9 +146,9 @@ const styles = StyleSheet.create({
   },
   
   moveTimeView: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center"
+    // flex: 1,
+    // alignItems: "center",
+    // justifyContent: "center"
   },
   addMoveText: {
     fontSize: getFontSize(20), 

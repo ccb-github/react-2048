@@ -48,7 +48,7 @@ export default function GameScreen(props:
   const [moveTime, setMoveTime] = useState(0) 
   const [moveDir, setMoveDir] = useState<MoveDirection>("static")
   const [motionSign, setMotionSign] = useState<MotionSign>([0, 0])
-  const MARGIN_WIDTH = 0
+  const MARGIN_WIDTH = 3
   // let TILE_WIDTH, GAMEBOX_WIDTH
   const useMoveTile = (dirSign: number[], prevTileMatrix: number[][]) => {
     const size = gameBoardSize;
@@ -193,8 +193,6 @@ export default function GameScreen(props:
     if (haveEmptySpace()) return true;
     return bfsGrid(squareMatrix.current);
   }
-
-  
   
   const undo = () => {
     if(history.current.length !== 0){
@@ -228,8 +226,6 @@ export default function GameScreen(props:
       });
     });
     
-   
-
     console.log("Square matrix", JSON.stringify(squareMatrix.current))
     setMoveTime(moveTime + 1);
     history.current.push(JSON.stringify(squareMatrix.current))
@@ -242,7 +238,7 @@ export default function GameScreen(props:
     }
     setMoveTime(moveTime + 1)
   }
-    
+
   return (
     <View style={styles.gameBoard}>
       <HeaderBox
@@ -256,6 +252,7 @@ export default function GameScreen(props:
           height: GAMEBOX_WIDTH,
           borderColor: "#000",
           borderWidth: 2,
+          borderRadius: 3,
         }}
         {...createResponder(moveFrame).panHandlers}
       >
@@ -271,6 +268,7 @@ export default function GameScreen(props:
               value={col}
               moveMent={moveDir}
               motionSign={motionSign}
+              tileOpacity={"newAppear"}
               animation={{
                 0: {
                   opacity: 0.6,
@@ -291,7 +289,8 @@ export default function GameScreen(props:
         gameTime={gameTime.current}
         style={{
           width: "100%",
-          flexGrow: 0,
+          // flexGrow: 0,
+          flexGrow: 1,
           flexShrink: 1,
           flexBasis: "auto",
         }}
@@ -304,7 +303,9 @@ export default function GameScreen(props:
 
 
 /**
- *   <View
+ * @deprecated
+ * @description Old code 
+ *  <View
                 key={j}
                 style={[
                   styles.gameBoxCell,

@@ -5,7 +5,7 @@ let { width: vw, height: vh} = Dimensions.get('window');
 console.log(vw,vh)
 
 let scale = vw / 490;
-console.log(scale)
+console.log(`The scale of screen ${scale}`)
 const styles = StyleSheet.create({
   gameBoard: {
     height: vh - 90, 
@@ -15,6 +15,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#faf8ef',  
     borderColor: "red",
     borderWidth: 1,
+    borderRadius:  2,
   },
   gameBoxContainer: {
     width: vw ,
@@ -31,7 +32,7 @@ const styles = StyleSheet.create({
     width: '100%',
     flex: 1,
     flexDirection:'row',
-    borderColor: 'yellow',
+    borderColor: 'green',
     borderStyle: 'solid',
     borderTopWidth: 2 * scale, 
     borderBottomWidth: 2 * scale
@@ -54,10 +55,6 @@ const styles = StyleSheet.create({
   gameBoxCellFirst: {borderTopWidth: 4 * scale},
   gameBoxCellLast: {borderBottomWidth: 4 * scale},
 
-
-  gameFoot:{
-    
-  },
 
   tileContainer:{
     width:'100%',

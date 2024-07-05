@@ -173,6 +173,7 @@ export default function GameScreen(props:
     point.current = 0;
     
     // TODO dealing with not moving at all
+    
     setMoveTime(0)
   }
 
@@ -228,8 +229,6 @@ export default function GameScreen(props:
       });
     });
     
-   
-
     console.log("Square matrix", JSON.stringify(squareMatrix.current))
     setMoveTime(moveTime + 1);
     history.current.push(JSON.stringify(squareMatrix.current))
@@ -242,7 +241,7 @@ export default function GameScreen(props:
     }
     setMoveTime(moveTime + 1)
   }
-    
+  // Alert.alert(`${GAMEBOX_WIDTH}`)
   return (
     <View style={styles.gameBoard}>
       <HeaderBox

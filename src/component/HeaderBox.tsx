@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { View, Text, useWindowDimensions } from "react-native";
+import { View, Text, useWindowDimensions, Alert } from "react-native";
 import { Button } from "react-native-paper";
 import { GameBoard } from "../context";
 import GameScreen from "../screen/GameScreen";
@@ -37,6 +37,7 @@ const HeaderBox = (props: HeaderBoxProps) => {
   >(null);
  
   const randomWidth = useSharedValue(300);
+
   useEffect( () => {
     console.log(randomWidth.value)
   }, [randomWidth.value])
@@ -57,6 +58,7 @@ const HeaderBox = (props: HeaderBoxProps) => {
     switch (dialogState) {
       case "restartGame":
         return () => {
+         
           restartGame();
           setDialogState(null);
         };
@@ -79,15 +81,16 @@ const HeaderBox = (props: HeaderBoxProps) => {
       style={[
         divStyles.rowDiv,
         {
-          flexShrink: 1
+          flexShrink: 1,
         },
-        style
+        style,
       ]}
     >
       {dialogState ? (
         <ConfirmDialog
           content={dialogTitle[dialogState]}
-          dialogAction={dialogActionWrapper()} />
+          dialogAction={dialogActionWrapper()}
+        />
       ) : null}
       <View
         style={[
@@ -122,7 +125,7 @@ const HeaderBox = (props: HeaderBoxProps) => {
             onPress={() => {
               handlePress();
               //setDialogState("saveGame")
-            } }
+            }}
             mode="contained"
           >
             Save Game
@@ -139,7 +142,7 @@ const HeaderBox = (props: HeaderBoxProps) => {
             mode="contained"
             onPress={() => {
               setDialogState("undo");
-            } }
+            }}
           >
             Undo
           </Button>

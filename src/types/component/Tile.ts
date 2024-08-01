@@ -18,6 +18,7 @@ export type TileProps = {
     | string;
   motionSign: [-1, 0] | [1, 0] | [0, -1] | [0, 1] | [0, 0]
   moveMent: "static" | "left" | "right" | "up" | "down"
+tileOpacity: "vanish" | "newAppear" | "normal"
 };
 export type TileState = {
   value: number;

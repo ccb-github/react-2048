@@ -12,14 +12,12 @@ const styles:{
     borderWidth: 1,
     borderColor: 'black',
     position: 'absolute',
-
     flex: 1,
-    // alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 2,
     backgroundColor: 'rgba(238, 228, 218, 0.35)'
   },
-  baseTileText: {
+  tileTextBase: {
     fontWeight: "700",
     maxWidth: "100%",
     textAlign: "center",
@@ -69,7 +67,7 @@ const styles:{
     backgroundColor: '#edc850'
   },
   innerTile1024: {
-    fontSize: 18 * scale,
+    fontSize: 24 * scale,
     color: '#f9f6f2',
     backgroundColor: '#edc53f'
   },
@@ -79,12 +77,9 @@ const styles:{
     backgroundColor: '#edc22e'
   },
   
-  
-
 }
 
 export function innerTileStyle(num: number): TextStyle{
-  //@ts-ignore
   return styles[`innerTile${num}`]
 }
 

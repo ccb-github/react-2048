@@ -1,15 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import { View, Text, useWindowDimensions, Alert } from "react-native";
 import { Button } from "react-native-paper";
-import { GameBoard } from "../context";
-import GameScreen from "../screen/GameScreen";
 import { divStyles } from "../style/common.style";
 import Dimension from "../utils/dimension";
 import ConfirmDialog from "./ConfirmDialog";
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
-import { BaseButton } from "react-native-gesture-handler";
 
-const { scale, getFontSize, getWidth } = Dimension;
+const { getWidth } = Dimension;
 
 type HeaderBoxProps = {
   /**@deprecated */
@@ -19,10 +16,6 @@ type HeaderBoxProps = {
   undo: () => boolean | void;
 };
 
-const borderStyle = {
-  borderWidth: 5,
-  borderColor: "black",
-};
 const dialogTitle = {
   restartGame: "Are you sure you want to restart the game",
   saveGame: "Save the game to local storage( with)",
@@ -58,7 +51,6 @@ const HeaderBox = (props: HeaderBoxProps) => {
     switch (dialogState) {
       case "restartGame":
         return () => {
-         
           restartGame();
           setDialogState(null);
         };
@@ -120,11 +112,11 @@ const HeaderBox = (props: HeaderBoxProps) => {
           {/* TODO should we scale the small size */}
           <Button
             style={{
-              margin: getWidth(10),
+              //margin: getWidth(10),
+              //minHeight: getWidth(20)
             }}
             onPress={() => {
-              handlePress();
-              //setDialogState("saveGame")
+              setDialogState("saveGame")
             }}
             mode="contained"
           >
@@ -138,6 +130,7 @@ const HeaderBox = (props: HeaderBoxProps) => {
           <Button
             style={{
               margin: getWidth(10),
+              // minHeight: getWidth(20),
             }}
             mode="contained"
             onPress={() => {
@@ -155,7 +148,7 @@ const HeaderBox = (props: HeaderBoxProps) => {
               setDialogState("restartGame");
             }}
           >
-            Restart Game
+            Restart
           </Button>
         </View>
       </View>

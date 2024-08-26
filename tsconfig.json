@@ -20,7 +20,7 @@
   },
   "include": [
     "./src",
-    "src/types", ".old/Themed.tsx", ".old/EditScreenInfo.tsx",
+    "./types", ".old/Themed.tsx", ".old/EditScreenInfo.tsx",
   ],
   "extends": "expo/tsconfig.base"
 }

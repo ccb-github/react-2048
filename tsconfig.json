@@ -19,8 +19,7 @@
     ]
   },
   "include": [
-    "./src",
-    "src/types", 
+    "./src"
   ],
   "extends": "expo/tsconfig.base"
 }

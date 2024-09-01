@@ -1,21 +1,20 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 const GAME_STORAGE_PREFIX = "REACT-2048"
 
-const saveData = async (key: string, value: string | {[key: string]: string}) => {
-  typeof value === 'object' ? value = JSON.stringify(value): '' 
-  AsyncStorage.setItem(key, value)
-  
-}
-
-const loadData = async (key: string) => {
-  AsyncStorage.getItem(key, (error, result) => {
-    console.log(result)
+export async function saveData(
+  key: string,
+  value: string | Record<string, string>,
+) {
+  AsyncStorage.setItem(
+    key,
+    typeof value === "object" ? (value = JSON.stringify(value)) : value,
+  ).catch((error) => {
+    throw error
   })
 }
 
-export { 
-  saveData,
-  loadData
+export async function loadData(key: string) {
+  const setResult = await AsyncStorage.getItem(key)
+  return setResult
 }
-

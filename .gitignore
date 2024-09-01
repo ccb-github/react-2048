@@ -78,3 +78,8 @@ dist/
 docker-bigsur.sh
 docker-mot.sh
 package-lock.json
+
+# Custom
+src/__temp__/*
+package-lock.json
+

@@ -1,84 +1,97 @@
-import React, { useContext, useEffect, useState } from "react";
-import { View, Text, useWindowDimensions, Alert } from "react-native";
-import { Button } from "react-native-paper";
-import { divStyles } from "../style/common.style";
-import Dimension from "../utils/dimension";
-import ConfirmDialog from "./ConfirmDialog";
-import Animated, { Easing, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
-
-const { getWidth } = Dimension;
+import { useEffect, useState } from "react"
+import {
+  View,
+  Text,
+  useWindowDimensions,
+  type ViewStyle,
+  StyleSheet,
+  Pressable,
+} from "react-native"
+import { Button } from "react-native-paper"
+import { divStyles } from "../style/common.style"
+import ConfirmDialog from "./ConfirmDialog"
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated"
+import useScaledSize from "../utils/useScaledSize"
 
 type HeaderBoxProps = {
-  /**@deprecated */
-  callDialog?: (actionName: string) => any;
-  restartGame: () => boolean | void;
+  restartGame: () => void
   saveGame: () => unknown
-  undo: () => boolean | void;
-};
+  undo: () => void
+  style?: ViewStyle
+}
 
 const dialogTitle = {
   restartGame: "Are you sure you want to restart the game",
   saveGame: "Save the game to local storage( with)",
   undo: "Undo",
-};
+}
+
+const tempFunction = (size: number) => size
 
 const HeaderBox = (props: HeaderBoxProps) => {
-  const { restartGame, undo, saveGame } = props;
-  const { scale } = useWindowDimensions()
+  const { restartGame, undo, saveGame, style } = props
+
   const [dialogState, setDialogState] = useState<
     null | "undo" | "restartGame" | "saveGame"
-  >(null);
- 
-  const randomWidth = useSharedValue(300);
+  >(null)
 
-  useEffect( () => {
-    console.log(randomWidth.value)
-  }, [randomWidth.value])
+  const {
+    scale: winDimScale,
+    height: winDimHeight,
+    width: winDImWidth,
+    fontScale,
+  } = useWindowDimensions()
+  const randomWidth = useSharedValue(300)
   const config = {
     duration: 500,
     easing: Easing.bezier(0.5, 0.01, 0, 1),
-  };
-  const handlePress = () => {
-    randomWidth.value = Math.random() * 350;
-  };
-  const style = useAnimatedStyle(() => {
+  }
+  const animatedStyle = useAnimatedStyle(() => {
     return {
       width: withTiming(randomWidth.value, config),
-    };
-  });
+    }
+  })
+
+  useEffect(() => {
+    console.log({
+      winDimScale,
+      winDimHeight,
+      winDImWidth,
+      fontScale,
+    })
+  })
 
   const dialogActionWrapper = () => {
     switch (dialogState) {
       case "restartGame":
         return () => {
-          restartGame();
-          setDialogState(null);
-        };
+          console.log("Restart game dialogActionWrapper")
+          restartGame()
+          setDialogState(null)
+        }
       case "undo":
         return () => {
-          undo();
-          setDialogState(null);
-        };
+          undo()
+          setDialogState(null)
+        }
       case "saveGame":
         return () => {
           saveGame()
           setDialogState(null)
         }
       default:
-        throw new Error("You should pass right dialogState to the wrapper");
+        throw new Error("You should pass right dialogState to the wrapper")
     }
-  };
+  }
+
   return (
-    <Animated.View
-      style={[
-        divStyles.rowDiv,
-        {
-          flexShrink: 1,
-        },
-        style,
-      ]}
-    >
-      {dialogState ? (
+    <Animated.View style={[divStyles.rowDiv, style, animatedStyle]}>
+      {dialogState !== null ? (
         <ConfirmDialog
           content={dialogTitle[dialogState]}
           dialogAction={dialogActionWrapper()}
@@ -86,66 +99,98 @@ const HeaderBox = (props: HeaderBoxProps) => {
       ) : null}
       <View
         style={[
-          divStyles.buttonBox,
-          divStyles.colDiv,
-          {
-            width: "100%",
-            // height: "unset",
-            justifyContent: "flex-end",
+          divStyles.colDiv, {
+            minHeight: useScaledSize(30),
           },
         ]}
       >
-        <Text
+        <View
           style={{
-            flex: 1,
-            margin: "auto",
-            textAlign: "center",
-            alignContent: "center",
-            fontSize: 15 * scale,
-            fontWeight: "bold",
-            textAlignVertical: "top",
+            ...styles.buttonBox,
+            padding: useScaledSize(2),
           }}
         >
-          2048
-        </Text>
-        <View style={{ flex: 1, height: "100%" }}>
+          <Text
+            style={[
+              styles.gameTitleText,
+              {
+                padding: tempFunction(5),
+                fontSize: tempFunction(20),
+              },
+            ]}
+          >
+            2048
+          </Text>
+        </View>
+        {/* <View
+          style={[
+            styles.gameTitleText,
+            {
+              padding: tempFunction(5),
+              backgroundColor: "blue",
+              height: 30,
+              // fontSize: tempFunction(20),
+            },
+          ]}
+        >
+        </View> */}
+        <View
+          style={{
+            ...styles.buttonBox,
+            padding: useScaledSize(2),
+          }}
+        >
           {/* TODO should we scale the small size */}
           <Button
             style={{
-              //margin: getWidth(10),
-              //minHeight: getWidth(20)
+              ...styles.gameActionButton,
+              height: "100%",
+              width: "100%",
+              minHeight: useScaledSize(20),
             }}
             onPress={() => {
               setDialogState("saveGame")
             }}
-            mode="contained"
           >
             Save Game
           </Button>
         </View>
       </View>
       {/* Row two */}
-      <View style={[divStyles.buttonBox, divStyles.colDiv, { width: "100%" }]}>
-        <View style={{ flex: 1, height: "100%" }}>
+      <View style={[divStyles.colDiv, { minHeight: tempFunction(40) }]}>
+        <View style={styles.buttonBox}>
           <Button
             style={{
-              margin: getWidth(10),
-              // minHeight: getWidth(20),
+              ...styles.gameActionButton,
+              minHeight: useScaledSize(20),
             }}
-            mode="contained"
             onPress={() => {
-              setDialogState("undo");
+              setDialogState("undo")
             }}
           >
-            Undo
+            <Text
+              style={{
+                textShadowColor: "red",
+                textShadowOffset: {
+                  width: 10,
+                  height: 10,
+                },
+              }}
+            >
+              Undo
+            </Text>
           </Button>
         </View>
-        <View style={{ flex: 1, height: "100%" }}>
+        <View style={styles.buttonBox}>
           <Button
-            style={{ margin: getWidth(10) }}
-            mode="contained"
+            style={[
+              styles.gameActionButton,
+              {
+                minHeight: useScaledSize(20),
+              },
+            ]}
             onPress={() => {
-              setDialogState("restartGame");
+              setDialogState("restartGame")
             }}
           >
             Restart
@@ -153,30 +198,36 @@ const HeaderBox = (props: HeaderBoxProps) => {
         </View>
       </View>
     </Animated.View>
-  );
-};
-
-export default HeaderBox;
-
-/*
-class HeaderBox = ({
-  let [point, setPoint] = useState(0)
- 
-  return (
-    <View style={divStyles.headerBox}>
-      <View style={divStyles.scoreBox}>
-        <Text style={[divStyles.scoreLabel, divStyles.bold,{color:'black'}]}>Point</Text>
-        <Text style={[divStyles.scoreContent, divStyles.bold,{color:'black'}]}>{point}</Text>
-      </View>
-      <View style={divStyles.gameButton}>
-        <Button  onPress={props.saveGame}  mode="contained" >
-          Save Game
-        </Button>
-        <Button   mode="contained" onPress={props.testFunc}>
-          Restart Game 
-        </Button>
-      </View>
-    </View>
   )
 }
-*/
+
+const styles = StyleSheet.create({
+  gameTitleText: {
+    textAlign: "center",
+    fontSize: 20,
+    fontWeight: "bold",
+    // textAlignVertical: "center",
+  },
+  buttonBox: {
+    flex: 1,
+    height: "100%",
+    alignItems: "center",
+    padding: tempFunction(5),
+    justifyContent: "center",
+  },
+  gameActionButton: {
+    backgroundColor: "#faffff",
+    borderWidth: 2,
+    borderRadius: 10,
+    borderColor: "#000",
+    aspectRatio: 1.4,
+
+    /* For text centering */
+    flex: 1,
+    flexGrow: 0,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+})
+
+export default HeaderBox

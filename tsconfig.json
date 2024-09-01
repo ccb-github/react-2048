@@ -15,12 +15,17 @@
     "strict": true,
     "rootDirs": [
       "./src",
-      "src/types"
-    ]
+      "./types"
+    ],
+    "paths": {
+      "#/*": [
+        "./src/types/*"
+      ]
+    }
   },
   "include": [
     "./src",
-    "./types", ".old/Themed.tsx", ".old/EditScreenInfo.tsx",
+    "index.ts"
   ],
   "extends": "expo/tsconfig.base"
 }

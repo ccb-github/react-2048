@@ -1,310 +1,333 @@
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { View, useWindowDimensions, Text, Alert } from "react-native";
-import FootBox from "../component/FootBox";
-import HeaderBox from "../component/HeaderBox";
-import Tile from "../component/Tile";
-import { GameBoard } from "../context";
-import styles from '../style/GameScreen.style'
-import createResponder from "../utils/panRes";
-import { saveData } from '../utils/storage'
-import { gameBoardSize } from "../model/GameBox";
-import { GameScreenProps } from "../navigation";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
+import {
+  View,
+  useWindowDimensions,
+  Alert,
+  ActivityIndicator,
+  type ViewStyle,
+  type TextStyle,
+} from "react-native"
+import HeaderBox from "../component/HeaderBox"
+import Tile from "../component/Tile"
+import { GameBoard } from "../context"
+import styles from "../style/GameScreen.style"
+import createPanResponder from "../utils/panRes"
+import { saveData } from "../utils/storage"
+import GameOver from "../component/GameOver"
+import useScaledSize from "../utils/useScaledSize"
+import FootBox from "../component/FootBox"
+import { SafeAreaView } from "react-native-safe-area-context"
+import { GameScreenProps } from "#/navigation"
+import { gameBoardSize, moveTile } from "../model/GameBox"
+import { dirSignList } from "#/component/gameBox"
 
 
-
-type GameStatus = {
-  
-}
 /**
  * @description The direction of the game object, static for not moving
  */
 type MoveDirection = "static" | "left" | "up" | "down" | "right"
 
-type MotionSign = [0, 0] | [-1, 0] | [1, 0] | [0, -1] |[0, 1] 
+type MotionSign = [0, 0] | [-1, 0] | [1, 0] | [0, -1] | [0, 1]
 
-//TODO migrate to reducer pattern  
+type SquareAction =
+  | "moveLeft"
+  | "moveRight"
+  | "moveUp"
+  | "moveDown"
+  | "newMerge"
 
-export default function GameScreen(props:
-  GameScreenProps
-){
-  let counter = -1
-  let context = useContext(GameBoard)
-  const squareRef = useRef<React.Ref<typeof Tile>[][]>([  
-    [null,null,null,null],
-    [null,null,null,null],
-    [null,null,null,null],
-    [null,null,null,null]
-  ]);
-  const squareMatrix = useRef<number[][]>(context);
- 
-  
+// TODO migrate to reducer pattern
+
+// class StoredGameData {
+//   gameTime: number
+//   moveTime: number
+
+//   constructor(gameTime, moveTime, squareMatrix)
+
+// }
+
+const GameScreen = (props: GameScreenProps) => {
+  const context = useContext(GameBoard)
+  const squareRef = useRef<Array<Array<SquareAction | null>>>([
+    [null, null, null, null],
+    [null, null, null, null],
+    [null, null, null, null],
+    [null, null, null, null],
+  ])
+  /**
+   * @ 2D Matrix for the tile number
+   */
+  const tileValueMatrix = useRef<number[][]>(context)
+
+  const SQUAREMATRIX = useRef<number[]>(
+    Array<number>(gameBoardSize * gameBoardSize).fill(-1),
+  )
+  const [gameSound, setGameSound] = useState()
+
   const history = useRef<string[]>([])
   const point = useRef(0)
-  // const moveTime = useRef(0)
-  const gameTime = useRef(0) 
-  const { width, scale} = useWindowDimensions()
+  const gameTime = useRef(0)
+  const {
+    width: screenWidth,
+    height: screenHeight,
+    scale,
+  } = useWindowDimensions()
 
-  const {loadedGameData} = props.route.params || {};
-  const [moveTime, setMoveTime] = useState(0) 
+  const [orientation, setOrientation] = useState("portrait")
+  const [gameOverVisible, setGameOverVisible] = useState(false)
+  const [moveTime, setMoveTime] = useState(0)
   const [moveDir, setMoveDir] = useState<MoveDirection>("static")
-  const [motionSign, setMotionSign] = useState<MotionSign>([0, 0])
+  const [motionSign] = useState<MotionSign>([0, 0])
+  const [gameDataLoading, setGameDataLoading] = useState(false)
+
   const MARGIN_WIDTH = 3
-  // let TILE_WIDTH, GAMEBOX_WIDTH
-  const useMoveTile = (dirSign: number[], prevTileMatrix: number[][]) => {
-    const size = gameBoardSize;
-    let squareStack: number[][] = [[],[],[],[]] 
-    // Array(gameBoardSize).fill([]);
+  const GAMEBOX_WIDTH =
+    orientation === "portrait"
+      ? screenWidth - useScaledSize(10)
+      : screenHeight - useScaledSize(10)
 
-    if (JSON.stringify(dirSign) === "[-1,0]") {
-      // Swipe up branch
-      setMoveDir("up")
-      for (let ri = 0; ri < size; ri++) {
-        for (let ci = 0; ci < size; ci++) {
-          if (
-            squareStack[ri].length &&
-            prevTileMatrix[ci][ri] > 0 &&
-            prevTileMatrix[ci][ri] === squareStack[ri].slice(-1)[0]
-          )
-            squareStack[ri][squareStack[ri].length - 1] =
-              squareStack[ri][squareStack[ri].length - 1] * 2;
-          else if (prevTileMatrix[ci][ri] > 0)
-            squareStack[ri].push(prevTileMatrix[ci][ri]);
-        }
-      }
-    } else if (JSON.stringify(dirSign) === "[1,0]") {
-      // Swipe down branch
-      setMoveDir("down")
-      for (let ri = 0; ri < size; ri++) {
-        for (let ci = 0; ci < size; ci++) {
-          if (
-            squareStack[ri].length &&
-            prevTileMatrix[3 - ci][ri] > 0 &&
-            prevTileMatrix[3 - ci][ri] === squareStack[ri].slice(-1)[0]
-          )
-            squareStack[ri][squareStack[ri].length - 1] =
-              squareStack[ri][squareStack[ri].length - 1] * 2;
-          else if (prevTileMatrix[3 - ci][ri] > 0)
-            squareStack[ri].push(prevTileMatrix[3 - ci][ri]);
-        }
-      }
-    } else if (JSON.stringify(dirSign) === "[0,-1]") {
-      // Swipe left
-      setMoveDir("left")
-      for (let ri = 0; ri < size; ri++) {
-        for (let ci = 0; ci < size; ci++) {
-          if (
-            squareStack[ri].length &&
-            prevTileMatrix[ri][ci] > 0 &&
-            prevTileMatrix[ri][ci] === squareStack[ri].slice(-1)[0]
-          )
-            squareStack[ri][squareStack[ri].length - 1] =
-              squareStack[ri][squareStack[ri].length - 1] * 2;
-          else if (prevTileMatrix[ri][ci] > 0)
-            squareStack[ri].push(prevTileMatrix[ri][ci]);
-        }
-      }
-    } else {
-      // Swipe right
-      setMoveDir("right")
-      for (let ri = 0; ri < size; ri++) {
-        for (let ci = 0; ci < size; ci++) {
-          if (
-            squareStack[ri].length &&
-            prevTileMatrix[ri][3 - ci] > 0 &&
-            prevTileMatrix[ri][3 - ci] === squareStack[ri].slice(-1)[0]
-          )
-            squareStack[ri][squareStack[ri].length - 1] =
-              squareStack[ri][squareStack[ri].length - 1] * 2;
-          else if (prevTileMatrix[ri][3 - ci] > 0)
-            squareStack[ri].push(prevTileMatrix[ri][3 - ci]);
-        }
-      }
-    }
+  const GAMEBOX_BORDER_WIDTH = 2
 
-    return squareStack;
-  };
-  const GAMEBOX_WIDTH = width - 10 * scale
-  const TILE_WIDTH = (GAMEBOX_WIDTH - 8 * MARGIN_WIDTH) >> 2 
-  useEffect(() => {
-    /**Load the transferred data to screen component */
-    if(Array.isArray(loadedGameData)) {
-      console.log(`Loaded data ${JSON.stringify(loadedGameData)}`)
-      squareMatrix.current = loadedGameData
-    }
-    else if(loadedGameData === undefined) {
-      return 
-    }
-    else {
-      throw Error(`Invalid loadedGameData ${JSON.stringify(loadedGameData)}`)
-    } 
-  }, [])
-    
-  const bfsGrid = (target: number[][]) => {
-    for(let i = 0; i<target.length-1; i++){
-      for(let j = 0; j< target[0].length-1; j++){
-      if (target[i][j] && target[i + 1][j] &&
-        target[i][j] == target[i + 1][j] ||
-        target[i][j] && target[i][j + 1] &&
-        target[i][j] == target[i][j + 1]) {
-        return true
-      } 
-      }
-    }
-    return false 
-  } 
 
-  function addRandomTile(){
-    const value = Math.random() < 0.9 ? 2 : 4;
-    let ri = Math.floor(Math.random() * 4),
-      ci = Math.floor(Math.random() * 4);
-    while (squareMatrix.current[ri][ci] > 0) {
-      ri = Math.floor(Math.random() * 4);
-      ci = Math.floor(Math.random() * 4);
-    }
-
-    squareMatrix.current[ri][ci] = value
-  }
-  function restartGame() {
-    for (let i = 0; i < gameBoardSize; i++) {
-      for (let j = 0; i < gameBoardSize; j++) {
-        squareMatrix.current[i][j] = -1
-      }
-    }
-    point.current = 0;
-    
-    // TODO dealing with not moving at all
-    setMoveTime(0)
-  }
-
-  const haveEmptySpace = () => {
-    for (let row of squareMatrix.current) {
-      for (let col of row) {
-        if (col === -1) return true;
-      }
-    }
-    return false;
-  }
-
-  const saveGame = () => {
-    saveData(new Date().getTime().toString(), JSON.stringify(squareMatrix.current));
-  }
-
-  const moveAvailable = () => {
-    if (haveEmptySpace()) return true;
-    return bfsGrid(squareMatrix.current);
-  }
-  
-  const undo = () => {
-    if(history.current.length !== 0){
-      squareMatrix.current = JSON.parse(history.current.pop()!) as number[][]; 
-      setMoveTime(moveTime - 1)     
-    }
-  }
+  const TILE_WIDTH =
+    (GAMEBOX_WIDTH - 8 * MARGIN_WIDTH * scale - GAMEBOX_BORDER_WIDTH * scale * 2) >> 2
   
 
-  const moveFrame = (dirSign: number[]) => {
-    let squareStack = useMoveTile(dirSign, squareMatrix.current)
-   
-    //Rotate the matrix back
-    //The logic is not right
-    squareMatrix.current = [
-      [-1, -1, -1, -1],
-      [-1, -1, -1, -1],
-      [-1, -1, -1, -1],
-      [-1, -1, -1, -1],
-    ];
-    
-    // Please notice the object
-    squareStack.map((row, i) => {
-      row.map((col, j) => {
-        if (dirSign[0] != 0) {
-          squareMatrix.current[dirSign[0] < 0 ? j : 3 - j][i] = col;
-        } else {
+  const orientationStyle = useMemo<
+    Record<"gameBoard" | "gameBox" | "footBox", ViewStyle | TextStyle>
+  >(
+    () => ({
+      gameBoard: {
+        flexDirection: orientation === "portrait" ? "column" : "row",
+        height: screenHeight - 80,
+      },
+      gameBox: {
+        width: GAMEBOX_WIDTH,
+        aspectRatio: 1,
+      },
+      footBox: {
+        minHeight: scale * 60,
+      },
+    }),
+    [orientation],
+  )
 
-          squareMatrix.current[i][dirSign[1] < 0 ? j : 3 - j] = col;
-        }
-      });
-    });
-    
-    console.log("Square matrix", JSON.stringify(squareMatrix.current))
-    setMoveTime(moveTime + 1);
-    history.current.push(JSON.stringify(squareMatrix.current))
-    if (haveEmptySpace()) {
-      addRandomTile();
-    }
-    else if(!bfsGrid(squareMatrix.current)) {
-      // The game is over 
-      Alert.alert("Game over")
-    }
-    setMoveTime(moveTime + 1)
-  }
-
-  return (
-    <View style={styles.gameBoard}>
-      <HeaderBox
-        restartGame={restartGame}
-        undo={undo}
-        saveGame={saveGame}
-      />
-      <View
-        style={{
-          width: GAMEBOX_WIDTH,
-          height: GAMEBOX_WIDTH,
+  const GameBox = () => (
+    <View
+      style={[{
+          /** Border style */
           borderColor: "#000",
-          borderWidth: 2,
-          borderRadius: 3,
-        }}
-        {...createResponder(moveFrame).panHandlers}
-      >
-        {squareMatrix.current.map((row, i) =>
-          row.map((col, j) => (
+          borderWidth: useScaledSize(2),
+          borderRadius: useScaledSize(5),
+          /** ************ */
+        },
+        orientationStyle.gameBox,
+      ]}
+      {...createPanResponder(_handleSwipe).panHandlers}
+    >
+      {gameDataLoading ? <ActivityIndicator size={"large"} /> : null}
+      {tileValueMatrix.current.map((row, i) =>
+        row.map((col, j) =>
+          col > 0 ? (
             <Tile
               key={i * 4 + j}
               tileWidth={TILE_WIDTH}
               style={{
-                ...styles.tileContainer,
-                width: TILE_WIDTH
+                width: TILE_WIDTH,
               }}
               value={col}
               moveMent={moveDir}
               motionSign={motionSign}
               tileOpacity={"newAppear"}
-              animation={{
-                0: {
-                  opacity: 0.6,
-                  scale: 0.8,
-                },
-                1: {
-                  opacity: 1,
-                  scale: 1,
-                },
-              }}
               position={[j, i]}
             />
-          ))
-        )}
-      </View>
+          ) : null
+        )
+      )}
+    </View>
+  )
+
+  useEffect(() => {
+    if (screenWidth > screenHeight) {
+      setOrientation("landscape")
+    } else {
+      setOrientation("portrait")
+    }
+  }, [screenWidth, screenHeight])
+
+  useEffect(() => {
+    Alert.alert("loadGameData useEffect")
+
+    if (props.route.params?.loadedGameData !== undefined) {
+      setGameDataLoading(true)
+      const parsedRouteData = JSON.parse(props.route.params?.loadedGameData)
+
+      tileValueMatrix.current = parsedRouteData.squareMatrix
+      gameTime.current = parsedRouteData.gameTime
+      history.current = parsedRouteData.history
+
+      setGameDataLoading(false)
+    }
+    //   throw Error(`Invalid loadedGameData ${props.route.params.loadedGameData}`)
+  }, [props.route.params])
+
+  /**
+   * @param target the array should be equal size in both dimension
+   * @returns
+   */
+  function bfsGrid(target: number[][]) {
+    const targetMainLength = target.length
+    if (targetMainLength !== gameBoardSize) {
+      throw new Error("Given incorrect sized array in main axis")
+    }
+    for (let i = 0; i < targetMainLength; i++) {
+      if (target[i].length !== targetMainLength)
+        throw new Error(`Checked 2D array has incorrect size in index ${i}`)
+    }
+
+    for (let i = 0; i < gameBoardSize; i++) {
+      for (let j = 0; j <= target[0].length - 1; j++) {
+        if (target[i][j] === target[i][j + 1]) {
+          return true
+        }
+        if (target[j][i] === target[j + 1][i]) {
+          return true
+        }
+      }
+    }
+    return false
+  }
+
+  const addRandomTile = () => {
+    const value = Math.random() < 0.9 ? 2 : 4
+    // eslint-disable-next-line one-var
+    let ri = Math.floor(Math.random() * 4),
+      ci = Math.floor(Math.random() * 4)
+    while (tileValueMatrix.current[ri][ci] > 0) {
+      ri = Math.floor(Math.random() * 4)
+      ci = Math.floor(Math.random() * 4)
+    }
+    // Assign the new tile
+    tileValueMatrix.current[ri][ci] = value
+  }
+  const restartGame = useCallback(() => {
+    Alert.alert("Restart game function")
+
+    tileValueMatrix.current = context
+    point.current = 0
+
+    // TODO dealing with not moving at all
+    setMoveTime(0)
+    return true
+  }, [setMoveTime])
+
+  /**
+   * @description Return boolean value determine if the gameBox has space left
+   * @returns
+   */
+  const haveEmptySpace = () => {
+    for (const row of tileValueMatrix.current) {
+      for (const col of row) {
+        if (col === -1) return true
+      }
+    }
+    return false
+  }
+
+  const saveGame = () => {
+    saveData(
+      new Date().getTime().toString(),
+      JSON.stringify({
+        squareMatrix: tileValueMatrix.current,
+        gameTime: gameTime.current,
+        history: history.current,
+      }),
+    ).catch((error) => {
+      console.error(error)
+    })
+  }
+
+  const undo = () => {
+    const lastHistory = history.current.pop()
+    if (lastHistory !== undefined) {
+      tileValueMatrix.current = JSON.parse(lastHistory) as number[][]
+      setMoveTime(moveTime - 1)
+    }
+  }
+
+  const _handleSwipe = (dirSign: (typeof dirSignList)[number]) => {
+    const squareStack = moveTile(dirSign, tileValueMatrix.current)
+
+    tileValueMatrix.current = [
+      [-1, -1, -1, -1],
+      [-1, -1, -1, -1],
+      [-1, -1, -1, -1],
+      [-1, -1, -1, -1],
+    ]
+
+    squareStack.forEach((row, i) => {
+      row.forEach((col, j) => {
+        if (dirSign[0] !== 0) {
+          tileValueMatrix.current[dirSign[0] < 0 ? j : 3 - j][i] = col
+        } else {
+          tileValueMatrix.current[i][dirSign[1] < 0 ? j : 3 - j] = col
+        }
+      })
+    })
+
+    setMoveTime(moveTime + 1)
+    history.current.push(JSON.stringify(tileValueMatrix.current))
+
+    if (haveEmptySpace()) {
+      addRandomTile()
+    } else if (!bfsGrid(tileValueMatrix.current)) {
+      // The game is over
+      setGameOverVisible(true)
+    }
+  }
+
+  return (
+    <SafeAreaView
+      style={[
+        styles.gameBoard,
+        {
+          width: screenWidth,
+        },
+        orientationStyle.gameBoard,
+      ]}
+    >
+      <GameOver
+        isVisible={gameOverVisible}
+        restartGame={restartGame}
+        setIsVisible={setGameOverVisible}
+      />
+
+      <HeaderBox
+        restartGame={restartGame}
+        undo={undo}
+        saveGame={saveGame}
+        style={{
+          flexShrink: 1,
+          width: "100%",
+          flexGrow: 1,
+          minHeight: useScaledSize(60),
+        }}
+      />
+      <GameBox />
       <FootBox
         moveTime={moveTime}
         gameTime={gameTime.current}
-        style={{
-          width: "100%",
-          // flexGrow: 0,
-          flexGrow: 1,
-          flexShrink: 1,
-          flexBasis: "auto",
-        }}
+        style={{ ...styles.footBox, ...orientationStyle.footBox }}
       />
-    </View>
-  );
+    </SafeAreaView>
+  )
 }
- 
-
-
 
 /**
  * @deprecated
  * @description Old code 
+ * 
+ * 
  *  <View
                 key={j}
                 style={[
@@ -316,3 +339,5 @@ export default function GameScreen(props:
                 ]}
               >
  */
+
+export default GameScreen

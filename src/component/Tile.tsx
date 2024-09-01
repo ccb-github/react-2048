@@ -1,71 +1,48 @@
 import {
-  ViewStyle,
-  TextProps,
-  TextStyle,
   Text,
-  ViewProps,
-  ViewProperties,
-  View,
-  Alert,
-  Button,
 } from "react-native";
 import React, {
-  ClassicComponent,
-  Component,
-  createRef,
   useEffect,
   useRef,
 } from "react";
 import styles, { innerTileStyle } from "../style/Tile.style";
-import Animatable from "../animation/register";
 import Dimensions from "../utils/dimension";
-
-import { TileProps, TileState } from "../types/component/Tile";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
+  withSequence,
   withSpring,
+  withTiming,
 } from "react-native-reanimated";
-const { width: vw, height: vh, scale } = Dimensions;
+import { TileProps } from "#/component/tile";
+import useScaledSize from "../utils/useScaledSize";
 
-const MARGIN_WIDTH = 3;
+
+
+const MARGIN_WIDTH = 3
 
 function Tile(props: TileProps) {
-  const motionValue = useSharedValue(0);
-  const visibilityValue = useSharedValue(0.5);
-  const motionStyle = useAnimatedStyle(() => ({
-    left:
-      props.position[0] * (props.tileWidth + MARGIN_WIDTH * 2) +
-      MARGIN_WIDTH * 1 +
-      props.motionSign[1] * props.tileWidth,
-    top:
-      props.position[1] * (props.tileWidth + MARGIN_WIDTH * 2) +
-      MARGIN_WIDTH * 1 +
-      props.motionSign[0] * props.tileWidth,
-    width: props.tileWidth,
-    height: props.tileWidth,
-  }));
+  const visibilityValue = useSharedValue(1)
+  const preValue = useRef(props.value)
+
+  
 
   const visabilityAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: withSpring(visibilityValue.value),
+    opacity: visibilityValue.value,
+    // width: props.tileWidth * visibilityValue.value,
+    transform: [{ scale: visibilityValue.value }],
   }))
 
-  useEffect(() => {
-    // console.log("Visiable effect runned")
-   
-  },[props.tileOpacity])
-
-  const tileSetting = {};
   const tilePositionStyle = {
     left:
-      props.position[0] * (props.tileWidth + MARGIN_WIDTH * 2) +
-      MARGIN_WIDTH * 1,
+      props.position[0] * (props.tileWidth + useScaledSize(MARGIN_WIDTH * 2) ) +
+      useScaledSize(MARGIN_WIDTH),
     top:
-      props.position[1] * (props.tileWidth + MARGIN_WIDTH * 2) +
-      MARGIN_WIDTH * 1,
-    width: props.tileWidth,
+      props.position[1] * (props.tileWidth + useScaledSize(MARGIN_WIDTH * 2) ) +
+      useScaledSize(MARGIN_WIDTH),
+    // width: props.tileWidth,
     height: props.tileWidth,
-  };
+  }
 
   useEffect(() => {
     // switch(props.moveMent) {
@@ -78,40 +55,44 @@ function Tile(props: TileProps) {
     //   case 'down':
     //     break
     // }
-  }, [props.value]);
+    console.log(
+      `Value change effect runned ${preValue.current}, ${props.value}`,
+    )
+    if (props.value > preValue.current) {
+      visibilityValue.value = withSequence(
+        withTiming(0.2, { duration: 30 }),
+        withTiming(1, { duration: 400 }),
+      )
+    }
+  }, [props.value])
 
-  if (props.value > 0) {
-    return (
-      <Animated.View
+  return (
+    <Animated.View
+      style={[
+        styles.squareFrame,
+        tilePositionStyle,
+        props.style,
+        {
+          backgroundColor: innerTileStyle(props.value).backgroundColor,
+        },
+        visabilityAnimatedStyle,
+      ]}
+    >
+      <Text
+        adjustsFontSizeToFit={true}
         style={[
-          styles.squareFrame,
-          props.style,
-          tilePositionStyle,
-          //Animate style
-          
-          motionStyle,
-          visabilityAnimatedStyle,
+          styles.tileTextBase,
           {
-            backgroundColor: innerTileStyle(props.value)["backgroundColor"],
-            
-          }
+            overflow: "hidden",
+            fontSize: innerTileStyle(props.value).fontSize,
+            color: innerTileStyle(props.value).color,
+          },
         ]}
-        
       >
-        <Text
-          adjustsFontSizeToFit={true}
-          style={[
-            styles.tileTextBase, 
-            innerTileStyle(props.value)
-          ]}
-        >
-          {props.value}
-        </Text>
-      </Animated.View>
-    );
-  } else {
-    return null;
-  }
+        {props.value}
+      </Text>
+    </Animated.View>
+  )
 }
-// const AnimatedTile = Animated.createAnimatedComponent(Tile)
-export default Tile;
+
+export default Tile

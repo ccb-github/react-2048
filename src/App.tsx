@@ -1,24 +1,25 @@
+import { Provider } from "react-native-paper"
+import { NavigationContainer } from "@react-navigation/native"
+import { createStackNavigator } from "@react-navigation/stack"
 
-import React from 'react';
-import { Provider } from 'react-native-paper'
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import HomeScreen from "./screen/HomeScreen"
+import GameScreen from "./screen/GameScreen"
+import LoadGameScreen from "./screen/LoadGameScreen"
+import { GameBoard as GameBoardContext } from "./context"
+import {
+  type MainStackParamList,
+  MainStackRouteName,
+} from "#/navigation"
+import TestScreen from "./__temp__/TestScreen"
 
-import HomeScreen from "./screen/HomeScreen";
-import GameScreen from './screen/GameScreen';
-import LoadGameScreen from './screen/LoadGameScreen'
-import { GameBoard as GameBoardContext } from './context';
-import { StackRouteName } from './model/navigation';
-const Stack = createStackNavigator();
-
-
+const Stack = createStackNavigator<MainStackParamList>()
 
 const App = () => {
   return (
     <Provider>
       <GameBoardContext.Provider
         value={[
-          [-1, 1024, -1, 2],
+          [2, 4, -1, -1],
           [-1, -1, -1, -1],
           [-1, -1, -1, -1],
           [-1, -1, -1, -1],
@@ -26,37 +27,24 @@ const App = () => {
       >
         <NavigationContainer>
           <Stack.Navigator>
-            <Stack.Screen name={StackRouteName["home"]} component={HomeScreen} />
-            <Stack.Screen name={StackRouteName["main"]} component={GameScreen} />
-            <Stack.Screen name={StackRouteName["load"]} component={LoadGameScreen}/>
+            <Stack.Screen
+              name={MainStackRouteName[2]}
+              component={HomeScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen name={MainStackRouteName[0]} component={GameScreen} />
+            <Stack.Screen
+              name={MainStackRouteName[1]}
+              component={LoadGameScreen}
+            />
+            <Stack.Screen name={MainStackRouteName[3]} component={TestScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </GameBoardContext.Provider>
     </Provider>
-  );
-} 
+  )
+}
 
 export default App
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- /*<Animatable.View  
-                          style={styles.tileContainer}
-                          ref={ref => this.squareRef[i][j] = ref}> </Animatable.View>*/

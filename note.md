@@ -8,3 +8,11 @@ function Parent() {
 function Child(props){
   const [childState] = useState(props.prop)
 }
+
+# Text nesting in react-native \#This will not work
+```jsx
+<Text>
+  <View/>
+  {/*<Other non-text component*/}
+</Text>
+```

@@ -1,19 +1,31 @@
-{
+{   
+    "ignorePatterns":["metro.config.js"],
     "env": {
         "es2021": true,
         "node": true
     },
     "extends": [
         "standard-with-typescript",
-        "plugin:react/recommended"
+        "plugin:react/recommended",
+        "plugin:react/jsx-runtime",
+        "plugin:prettier/recommended"
     ],
     "parserOptions": {
         "ecmaVersion": "latest",
         "sourceType": "module"
     },
     "plugins": [
-        "react"
+        "react",
+        "prettier"
     ],
     "rules": {
+      "prettier/prettier": ["warn"],
+      "linebreak-style": ["warn", "unix"],
+      "@typescript-eslint/quotes": ["warn", "double"],
+      "@typescript-eslint/consistent-type-definitions": ["warn", "type"],
+      "@typescript-eslint/no-misused-promises": "warn",
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "react-native/no-color-literals": "warn",
+      "@typescript-eslint/comma-dangle": ["off"]
     }
 }

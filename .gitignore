@@ -79,6 +79,7 @@ docker-bigsur.sh
 docker-mot.sh
 package-lock.json
 
-
-### User config
+# Custom
+src/__temp__/*
 package-lock.json
+

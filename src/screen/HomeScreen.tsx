@@ -1,30 +1,42 @@
-import React from 'react'
-import { Button } from 'react-native-paper'
-import { View, StyleSheet } from 'react-native'
-import { HomeScreenProps } from '../navigation'
-
-
+import { Button } from "react-native-paper"
+import type { HomeScreenProps } from "#/navigation"
+import useScaledSize from "../utils/useScaledSize"
+import { SafeAreaView } from "react-native-safe-area-context"
 
 const HomeScreen = ({ navigation }: HomeScreenProps) => {
-    return (
-      <View>
-        <Button mode='outlined'
-          onPress={ () => {navigation.navigate('Main')} }>
-          Start new game
-        </Button>
-        <Button mode='outlined'
-          onLongPress={()=>{}}
-          onPress={ () => {navigation.navigate("LoadGame")} }>
-          LOAD SAVED
-        </Button>
-        
-      </View>
-    )
-  } 
+  return (
+    <SafeAreaView>
+      <Button
+        mode="outlined"
+        style={{ margin: useScaledSize(5) }}
+        onPress={() => {
+          navigation.navigate("Main")
+        }}
+      >
+        Start new game
+      </Button>
+      <Button
+        mode="outlined"
+        style={{ margin: useScaledSize(5) }}
+        onLongPress={() => {}}
+        onPress={() => {
+          navigation.navigate("LoadGame")
+        }}
+      >
+        Load Saved
+      </Button>
+      <Button
+        mode="outlined"
+        style={{ margin: useScaledSize(5) }}
+        onLongPress={() => {}}
+        onPress={() => {
+          navigation.navigate("Test")
+        }}
+      >
+        Test
+      </Button>
+    </SafeAreaView>
+  )
+}
 
-  export default HomeScreen
-  //export default Vara = <function definition> !not work
-  
-
-  //style={ {width:'100%',
-  //height:'100%'}}
+export default HomeScreen

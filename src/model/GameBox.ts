@@ -20,8 +20,8 @@ export function moveTile(
   const stackColSize = dirSign[0] !== 0 ? colSize : rowSize
 
   const indexTransverse = (
-    indexTuple: readonly number[],
-    dir: number[],
+    indexTuple: number[],
+    dir: readonly number[],
     colSizeLimit = stackColSize,
   ) => {
     const dirAbs = dir[0] + dir[1]
